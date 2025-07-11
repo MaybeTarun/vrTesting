@@ -3,22 +3,45 @@
   <head>
     <meta charset="utf-8" />
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </head>
   <body>
     <a-scene vr-mode-ui="enabled: true">
-      <!-- VideoSphere will render your 360° stereo video -->
+      <!-- VideoSphere renders the video on an inside-out sphere -->
       <a-videosphere 
         src="#vid360" 
         stereo="true"
         rotation="0 180 0">
       </a-videosphere>
-      <!-- Load your hosted MP4 here -->
+
+      <!-- Video element used as a texture source -->
       <video id="vid360" 
              autoplay 
              loop 
-             crossorigin="anonymous" 
-             src="idc.mp4">
+             playsinline 
+             webkit-playsinline 
+             crossorigin="anonymous"
+             muted>
       </video>
     </a-scene>
+
+    <script>
+      const video = document.getElementById('vid360');
+      const hlsSrc = 'https://cdn.bitmovin.com/content/assets/playhouse-vr/m3u8s/105560.m3u8';
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(hlsSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsSrc;
+        video.addEventListener('loadedmetadata', function () {
+          video.play();
+        });
+      }
+    </script>
   </body>
 </html>
