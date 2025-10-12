@@ -11,7 +11,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-2NMY31JHB9');
     </script>
 
@@ -54,6 +53,39 @@
     </a-scene>
 
     <script>
+      // -------------------------
+      // Helper: Read store info from URL
+      // -------------------------
+      function getStoreDataFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          id: params.get('store_id') || 'unknown',
+          name: params.get('store_name') || 'unknown',
+          location: params.get('store_location') || 'unknown',
+          poc: params.get('store_poc') || 'unknown',
+          type: params.get('store_type') || 'unknown'
+        };
+      }
+
+      const storeData = getStoreDataFromURL();
+
+      // -------------------------
+      // Function to send GA4 events
+      // -------------------------
+      function sendGAEvent(eventName, additionalParams = {}) {
+        gtag('event', eventName, {
+          store_id: storeData.id,
+          store_name: storeData.name,
+          store_location: storeData.location,
+          store_poc: storeData.poc,
+          store_type: storeData.type,
+          ...additionalParams
+        });
+      }
+
+      // -------------------------
+      // Video handling
+      // -------------------------
       const video = document.getElementById('vid360');
       const selector = document.getElementById('language-selector');
       const loader = document.getElementById('loader');
@@ -81,6 +113,16 @@
             video.play();
           });
         }
+
+        // Track video start
+        video.addEventListener('play', () => {
+          sendGAEvent('video_start', { video_language: hlsSrc.includes('hindi') ? 'Hindi' : 'Malayalam' });
+        });
+
+        // Track video end
+        video.addEventListener('ended', () => {
+          sendGAEvent('video_complete', { video_language: hlsSrc.includes('hindi') ? 'Hindi' : 'Malayalam' });
+        });
       }
 
       document.getElementById('hindiBtn').addEventListener('click', () => {
@@ -94,6 +136,9 @@
         setTimeout(() => (selector.style.display = 'none'), 500);
         loadVideo(sources.malayalam);
       });
+
+      // Track page view immediately
+      sendGAEvent('store_page_view');
     </script>
   </body>
 </html>
