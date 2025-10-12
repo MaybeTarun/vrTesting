@@ -1,103 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>360 Video Language Selector</title>
+    <title>360 Video | Language Selector</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- A-Frame + HLS.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-        background: black;
-      }
-
-      /* Language selection overlay */
-      #language-selector {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        color: white;
-        font-family: sans-serif;
-        transition: opacity 0.5s ease;
-      }
-
-      #language-selector.fade-out {
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      #language-selector h1 {
-        margin-bottom: 24px;
-        font-size: 2rem;
-      }
-
-      .lang-btn {
-        padding: 12px 24px;
-        margin: 10px;
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: 0.3s ease;
-        background: #222;
-        color: white;
-      }
-
-      .lang-btn:hover {
-        transform: scale(1.05);
-        background: #444;
-      }
-
-      /* Loader overlay */
-      #loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9998;
-        color: white;
-        font-family: sans-serif;
-        flex-direction: column;
-      }
-
-      .spinner {
-        border: 6px solid rgba(255, 255, 255, 0.2);
-        border-top: 6px solid white;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        animation: spin 1s linear infinite;
-        margin-bottom: 20px;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    </style>
+    <!-- External Styles -->
+    <link rel="stylesheet" href="styles.css" />
   </head>
 
   <body>
     <!-- Language selection overlay -->
     <div id="language-selector">
       <h1>Select Language</h1>
-      <button class="lang-btn" id="hindiBtn">Hindi</button>
-      <button class="lang-btn" id="malayalamBtn">Malayalam</button>
+      <div class="button-row">
+        <button class="lang-btn" id="hindiBtn">Hindi</button>
+        <button class="lang-btn" id="malayalamBtn">Malayalam</button>
+      </div>
     </div>
 
     <!-- Loader -->
@@ -138,17 +61,9 @@
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
 
-          hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
-          });
-
-          hls.on(Hls.Events.LEVEL_LOADED, function () {
-            loader.style.display = 'none';
-          });
-
-          video.addEventListener('playing', () => {
-            loader.style.display = 'none';
-          });
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+          hls.on(Hls.Events.LEVEL_LOADED, () => (loader.style.display = 'none'));
+          video.addEventListener('playing', () => (loader.style.display = 'none'));
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           video.src = hlsSrc;
           video.addEventListener('loadedmetadata', function () {
