@@ -2,46 +2,173 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <title>360 Video Language Selector</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  </head>
-  <body>
-    <a-scene vr-mode-ui="enabled: true">
-      <!-- VideoSphere renders the video on an inside-out sphere -->
-      <a-videosphere 
-        src="#vid360" 
-        stereo="true"
-        rotation="0 180 0">
-      </a-videosphere>
 
-      <!-- Video element used as a texture source -->
-      <video id="vid360" 
-             autoplay 
-             loop 
-             playsinline 
-             webkit-playsinline 
-             crossorigin="anonymous"
-             muted>
-      </video>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+      }
+
+      /* Language selection overlay */
+      #language-selector {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        font-family: sans-serif;
+        transition: opacity 0.5s ease;
+      }
+
+      #language-selector.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #language-selector h1 {
+        margin-bottom: 24px;
+        font-size: 2rem;
+      }
+
+      .lang-btn {
+        padding: 12px 24px;
+        margin: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: 0.3s ease;
+        background: #222;
+        color: white;
+      }
+
+      .lang-btn:hover {
+        transform: scale(1.05);
+        background: #444;
+      }
+
+      /* Loader overlay */
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9998;
+        color: white;
+        font-family: sans-serif;
+        flex-direction: column;
+      }
+
+      .spinner {
+        border: 6px solid rgba(255, 255, 255, 0.2);
+        border-top: 6px solid white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Language selection overlay -->
+    <div id="language-selector">
+      <h1>Select Language</h1>
+      <button class="lang-btn" id="hindiBtn">Hindi</button>
+      <button class="lang-btn" id="malayalamBtn">Malayalam</button>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader">
+      <div class="spinner"></div>
+      <p>Loading video, please wait...</p>
+    </div>
+
+    <!-- A-Frame Scene -->
+    <a-scene vr-mode-ui="enabled: true">
+      <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
+      <video
+        id="vid360"
+        autoplay
+        loop
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+        muted
+      ></video>
     </a-scene>
 
     <script>
       const video = document.getElementById('vid360');
-      const hlsSrc = 'https://stream.mux.com/e4jHaTTK8vsZMxpdHwTS0099ReM01NuvAHobk4t0102ijPM.m3u8';
+      const selector = document.getElementById('language-selector');
+      const loader = document.getElementById('loader');
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(hlsSrc);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = hlsSrc;
-        video.addEventListener('loadedmetadata', function () {
-          video.play();
-        });
+      const sources = {
+        hindi: 'https://stream.mux.com/e4jHaTTK8vsZMxpdHwTS0099ReM01NuvAHobk4t0102ijPM.m3u8',
+        malayalam: 'https://cdn.bitmovin.com/content/assets/playhouse-vr/m3u8s/105560.m3u8',
+      };
+
+      function loadVideo(hlsSrc) {
+        loader.style.display = 'flex';
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(hlsSrc);
+          hls.attachMedia(video);
+
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+          });
+
+          hls.on(Hls.Events.LEVEL_LOADED, function () {
+            loader.style.display = 'none';
+          });
+
+          video.addEventListener('playing', () => {
+            loader.style.display = 'none';
+          });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = hlsSrc;
+          video.addEventListener('loadedmetadata', function () {
+            loader.style.display = 'none';
+            video.play();
+          });
+        }
       }
+
+      document.getElementById('hindiBtn').addEventListener('click', () => {
+        selector.classList.add('fade-out');
+        setTimeout(() => (selector.style.display = 'none'), 500);
+        loadVideo(sources.hindi);
+      });
+
+      document.getElementById('malayalamBtn').addEventListener('click', () => {
+        selector.classList.add('fade-out');
+        setTimeout(() => (selector.style.display = 'none'), 500);
+        loadVideo(sources.malayalam);
+      });
     </script>
   </body>
 </html>
