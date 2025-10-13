@@ -66,9 +66,9 @@
           type: params.get('store_type') || 'unknown'
         };
       }
-
+    
       const storeData = getStoreDataFromURL();
-
+    
       // -------------------------
       // Function to send GA4 events
       // -------------------------
@@ -82,27 +82,27 @@
           ...additionalParams
         });
       }
-
+    
       // -------------------------
       // Video handling
       // -------------------------
       const video = document.getElementById('vid360');
       const selector = document.getElementById('language-selector');
       const loader = document.getElementById('loader');
-
+    
       const sources = {
         hindi: 'https://stream.mux.com/e4jHaTTK8vsZMxpdHwTS0099ReM01NuvAHobk4t0102ijPM.m3u8',
         malayalam: 'https://cdn.bitmovin.com/content/assets/playhouse-vr/m3u8s/105560.m3u8',
       };
-
-      function loadVideo(hlsSrc) {
+    
+      function loadVideo(hlsSrc, language) {
         loader.style.display = 'flex';
-
+    
         if (Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
-
+    
           hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
           hls.on(Hls.Events.LEVEL_LOADED, () => (loader.style.display = 'none'));
           video.addEventListener('playing', () => (loader.style.display = 'none'));
@@ -113,32 +113,39 @@
             video.play();
           });
         }
-
+    
         // Track video start
         video.addEventListener('play', () => {
-          sendGAEvent('video_start', { video_language: hlsSrc.includes('hindi') ? 'Hindi' : 'Malayalam' });
+          sendGAEvent('video_start', {
+            video_language: language,
+            video_completed: false
+          });
         });
-
+    
         // Track video end
         video.addEventListener('ended', () => {
-          sendGAEvent('video_complete', { video_language: hlsSrc.includes('hindi') ? 'Hindi' : 'Malayalam' });
+          sendGAEvent('video_complete', {
+            video_language: language,
+            video_completed: true
+          });
         });
       }
-
+    
       document.getElementById('hindiBtn').addEventListener('click', () => {
         selector.classList.add('fade-out');
         setTimeout(() => (selector.style.display = 'none'), 500);
-        loadVideo(sources.hindi);
+        loadVideo(sources.hindi, 'Hindi');
       });
-
+    
       document.getElementById('malayalamBtn').addEventListener('click', () => {
         selector.classList.add('fade-out');
         setTimeout(() => (selector.style.display = 'none'), 500);
-        loadVideo(sources.malayalam);
+        loadVideo(sources.malayalam, 'Malayalam');
       });
-
+    
       // Track page view immediately
       sendGAEvent('store_page_view');
     </script>
+    
   </body>
 </html>
