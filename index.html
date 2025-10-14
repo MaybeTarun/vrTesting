@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NZHKSD52');</script>
-  <!-- End Google Tag Manager -->
-   
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NZHKSD52');</script>
     <meta charset="utf-8" />
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </head>
   <body>
-    <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div id="language-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;color:#fff;flex-direction:column;gap:16px;font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;text-align:center;padding:24px;">
+      <div style="font-size:20px;margin-bottom:8px;">Select Language</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <button id="btn-hindi" style="padding:10px 16px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;font-size:16px;">Hindi</button>
+        <button id="btn-malayalam" style="padding:10px 16px;border-radius:8px;border:none;background:#16a34a;color:#fff;cursor:pointer;font-size:16px;">Malayalam</button>
+      </div>
+      <div style="opacity:0.8;font-size:12px;margin-top:8px;">The same demo video will play for both languages.</div>
+    </div>
 
     <a-scene vr-mode-ui="enabled: true">
-      <!-- VideoSphere renders the video on an inside-out sphere -->
       <a-videosphere 
         src="#vid360" 
         stereo="true"
         rotation="0 180 0">
       </a-videosphere>
 
-      <!-- Video element used as a texture source -->
       <video id="vid360" 
              autoplay 
              loop 
@@ -39,22 +40,70 @@
     </a-scene>
 
     <script>
-      const video = document.getElementById('vid360');
-      const hlsSrc = 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8';
+      // Make sure dataLayer exists
+      window.dataLayer = window.dataLayer || [];
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(hlsSrc);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
+      const video = document.getElementById('vid360');
+      const overlay = document.getElementById('language-overlay');
+      const btnHindi = document.getElementById('btn-hindi');
+      const btnMalayalam = document.getElementById('btn-malayalam');
+
+      const sourcesByLang = {
+        hi: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8',
+        ml: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8'
+      };
+
+      function startPlaybackForLanguage(langKey) {
+        const hlsSrc = sourcesByLang[langKey];
+        if (!hlsSrc) return;
+        
+        // ✅ GA4 TRACKING: Push language selection event to the data layer
+        dataLayer.push({
+          event: 'language_selected',
+          language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam'
         });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = hlsSrc;
-        video.addEventListener('loadedmetadata', function () {
+
+        overlay.style.display = 'none';
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(hlsSrc);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+          });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = hlsSrc;
+          video.addEventListener('loadedmetadata', function () {
+            video.play();
+          });
+        } else {
+          video.src = hlsSrc;
           video.play();
-        });
+        }
       }
+      
+      // ✅ GA4 TRACKING: Listen for the 'ended' event on the video element
+      let hasCompleted = false; // Prevent event from firing multiple times if video loops
+      video.addEventListener('ended', function() {
+        if (!hasCompleted) {
+          hasCompleted = true; // Set flag to true after first completion
+          console.log('Video has finished playing!'); // Good for testing in browser console
+          dataLayer.push({
+            event: 'video_completed'
+          });
+        }
+      });
+      // Reset the flag if the video starts over (due to loop or replay)
+      video.addEventListener('play', function() {
+        if (video.currentTime < 1) { // A good way to check if it's starting from the beginning
+            hasCompleted = false;
+        }
+      });
+
+
+      btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
+      btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
     </script>
   </body>
 </html>
