@@ -149,15 +149,6 @@
     ml: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8'
   };
 
-  // GA4 TRACKING: This function will handle pushing the event
-  // We define it once to avoid repeating code.
-  function fireVideoCompletedEvent() {
-    console.log('Video has finished playing!'); // For testing in browser console
-    dataLayer.push({
-      event: 'video_completed'
-    });
-  }
-
   function startPlaybackForLanguage(langKey) {
     const hlsSrc = sourcesByLang[langKey];
     if (!hlsSrc) return;
@@ -177,28 +168,42 @@
       hls.on(Hls.Events.MANIFEST_PARSED, function () {
         video.play();
       });
-      
-      // ✅ GA4 TRACKING: NEW, MORE RELIABLE METHOD
-      // Listen directly to the HLS.js event for when the stream ends.
-      hls.on(Hls.Events.BUFFER_EOS, function() {
-        fireVideoCompletedEvent();
-      });
-
     } else {
-      // Fallback for browsers that don't need HLS.js (like Safari)
+      // Fallback for browsers like Safari
       video.src = hlsSrc;
-      
-      // ✅ GA4 TRACKING: Use the standard 'ended' event as a fallback here
-      video.addEventListener('ended', fireVideoCompletedEvent);
-      
       video.addEventListener('loadedmetadata', function () {
         video.play();
       });
     }
   }
+  
+  // GA4 TRACKING: FINAL & MOST RELIABLE VIDEO COMPLETION LOGIC
+  let hasCompleted = false; 
+
+  // Listen for time updates as the video plays
+  video.addEventListener('timeupdate', function() {
+    // Check if the video duration is available, if we are in the last half-second,
+    // and if the event hasn't already been sent for this playthrough.
+    if (video.duration > 0 && (video.duration - video.currentTime < 0.5) && !hasCompleted) {
+      hasCompleted = true; // Set the flag so we only send the event once
+      console.log('Video playback has completed!'); // For testing in browser console
+      dataLayer.push({
+        event: 'video_completed'
+      });
+    }
+  });
+
+  // Reset the completion flag when the video starts playing from the beginning
+  // This is important if the user replays the video.
+  video.addEventListener('play', function() {
+    if (video.currentTime < 1) { 
+        hasCompleted = false;
+    }
+  });
 
   btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
   btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
 </script>
+
   </body>
 </html>
