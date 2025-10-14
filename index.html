@@ -1,151 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NZHKSD52');</script>
+  <!-- End Google Tag Manager -->
+   
     <meta charset="utf-8" />
-    <title>MYK</title>
-    <link rel="icon" type="image/png" href="favicon.png" />
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2NMY31JHB9"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-2NMY31JHB9');
-    </script>
-
-    <!-- A-Frame + HLS.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-    <!-- External Styles -->
-    <link rel="stylesheet" href="styles.css" />
   </head>
-
   <body>
-    <!-- Language selection overlay -->
-    <div id="language-selector">
-      <h1>Select Language</h1>
-      <div class="button-row">
-        <button class="lang-btn" id="hindiBtn">Hindi</button>
-        <button class="lang-btn" id="malayalamBtn">Malayalam</button>
-      </div>
-    </div>
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
 
-    <!-- Loader -->
-    <div id="loader">
-      <div class="spinner"></div>
-      <p>Loading video, please wait...</p>
-    </div>
-
-    <!-- A-Frame Scene -->
     <a-scene vr-mode-ui="enabled: true">
-      <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
-      <video
-        id="vid360"
-        autoplay
-        loop
-        playsinline
-        webkit-playsinline
-        crossorigin="anonymous"
-        muted
-      ></video>
+      <!-- VideoSphere renders the video on an inside-out sphere -->
+      <a-videosphere 
+        src="#vid360" 
+        stereo="true"
+        rotation="0 180 0">
+      </a-videosphere>
+
+      <!-- Video element used as a texture source -->
+      <video id="vid360" 
+             autoplay 
+             loop 
+             playsinline 
+             webkit-playsinline 
+             crossorigin="anonymous"
+             muted>
+      </video>
     </a-scene>
 
     <script>
-      // -------------------------
-      // Helper: Read store info from URL
-      // -------------------------
-      function getStoreDataFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        return {
-          id: params.get('store_id') || 'unknown',
-          name: params.get('store_name') || 'unknown',
-          location: params.get('store_location') || 'unknown',
-          poc: params.get('store_poc') || 'unknown',
-          type: params.get('store_type') || 'unknown'
-        };
-      }
-    
-      const storeData = getStoreDataFromURL();
-    
-      // -------------------------
-      // Function to send GA4 events
-      // -------------------------
-      function sendGAEvent(eventName, additionalParams = {}) {
-        gtag('event', eventName, {
-          store_id: storeData.id,
-          store_name: storeData.name,
-          store_location: storeData.location,
-          store_poc: storeData.poc,
-          store_type: storeData.type,
-          ...additionalParams
-        });
-      }
-    
-      // -------------------------
-      // Video handling
-      // -------------------------
       const video = document.getElementById('vid360');
-      const selector = document.getElementById('language-selector');
-      const loader = document.getElementById('loader');
-    
-      const sources = {
-        hindi: 'https://stream.mux.com/e4jHaTTK8vsZMxpdHwTS0099ReM01NuvAHobk4t0102ijPM.m3u8',
-        malayalam: 'https://cdn.bitmovin.com/content/assets/playhouse-vr/m3u8s/105560.m3u8',
-      };
-    
-      function loadVideo(hlsSrc, language) {
-        loader.style.display = 'flex';
-    
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(hlsSrc);
-          hls.attachMedia(video);
-    
-          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-          hls.on(Hls.Events.LEVEL_LOADED, () => (loader.style.display = 'none'));
-          video.addEventListener('playing', () => (loader.style.display = 'none'));
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = hlsSrc;
-          video.addEventListener('loadedmetadata', function () {
-            loader.style.display = 'none';
-            video.play();
-          });
-        }
-    
-        // Track video start
-        video.addEventListener('play', () => {
-          sendGAEvent('video_start', {
-            video_language: language,
-            video_completed: false
-          });
+      const hlsSrc = 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8';
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(hlsSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
         });
-    
-        // Track video end
-        video.addEventListener('ended', () => {
-          sendGAEvent('video_complete', {
-            video_language: language,
-            video_completed: true
-          });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsSrc;
+        video.addEventListener('loadedmetadata', function () {
+          video.play();
         });
       }
-    
-      document.getElementById('hindiBtn').addEventListener('click', () => {
-        selector.classList.add('fade-out');
-        setTimeout(() => (selector.style.display = 'none'), 500);
-        loadVideo(sources.hindi, 'Hindi');
-      });
-    
-      document.getElementById('malayalamBtn').addEventListener('click', () => {
-        selector.classList.add('fade-out');
-        setTimeout(() => (selector.style.display = 'none'), 500);
-        loadVideo(sources.malayalam, 'Malayalam');
-      });
-    
-      // Track page view immediately
-      sendGAEvent('store_page_view');
     </script>
-    
   </body>
 </html>
