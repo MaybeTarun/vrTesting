@@ -136,70 +136,69 @@
     </a-scene>
 
     <script>
-      // Make sure dataLayer exists
-      window.dataLayer = window.dataLayer || [];
+  // Make sure dataLayer exists
+  window.dataLayer = window.dataLayer || [];
 
-      const video = document.getElementById('vid360');
-      const overlay = document.getElementById('language-overlay');
-      const btnHindi = document.getElementById('btn-hindi');
-      const btnMalayalam = document.getElementById('btn-malayalam');
+  const video = document.getElementById('vid360');
+  const overlay = document.getElementById('language-overlay');
+  const btnHindi = document.getElementById('btn-hindi');
+  const btnMalayalam = document.getElementById('btn-malayalam');
 
-      const sourcesByLang = {
-        hi: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8',
-        ml: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8'
-      };
+  const sourcesByLang = {
+    hi: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8',
+    ml: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8'
+  };
 
-      function startPlaybackForLanguage(langKey) {
-        const hlsSrc = sourcesByLang[langKey];
-        if (!hlsSrc) return;
-        
-        // ✅ GA4 TRACKING: Push language selection event to the data layer
-        dataLayer.push({
-          event: 'language_selected',
-          language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam'
-        });
+  // GA4 TRACKING: This function will handle pushing the event
+  // We define it once to avoid repeating code.
+  function fireVideoCompletedEvent() {
+    console.log('Video has finished playing!'); // For testing in browser console
+    dataLayer.push({
+      event: 'video_completed'
+    });
+  }
 
-        overlay.style.display = 'none';
+  function startPlaybackForLanguage(langKey) {
+    const hlsSrc = sourcesByLang[langKey];
+    if (!hlsSrc) return;
+    
+    // GA4 TRACKING: Push language selection event
+    dataLayer.push({
+      event: 'language_selected',
+      language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam'
+    });
 
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(hlsSrc);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
-          });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = hlsSrc;
-          video.addEventListener('loadedmetadata', function () {
-            video.play();
-          });
-        } else {
-          video.src = hlsSrc;
-          video.play();
-        }
-      }
+    overlay.style.display = 'none';
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(hlsSrc);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play();
+      });
       
-      // ✅ GA4 TRACKING: Listen for the 'ended' event on the video element
-      let hasCompleted = false; // Prevent event from firing multiple times if video loops
-      video.addEventListener('ended', function() {
-        if (!hasCompleted) {
-          hasCompleted = true; // Set flag to true after first completion
-          console.log('Video has finished playing!'); // Good for testing in browser console
-          dataLayer.push({
-            event: 'video_completed'
-          });
-        }
-      });
-      // Reset the flag if the video starts over (due to loop or replay)
-      video.addEventListener('play', function() {
-        if (video.currentTime < 1) { // A good way to check if it's starting from the beginning
-            hasCompleted = false;
-        }
+      // ✅ GA4 TRACKING: NEW, MORE RELIABLE METHOD
+      // Listen directly to the HLS.js event for when the stream ends.
+      hls.on(Hls.Events.BUFFER_EOS, function() {
+        fireVideoCompletedEvent();
       });
 
+    } else {
+      // Fallback for browsers that don't need HLS.js (like Safari)
+      video.src = hlsSrc;
+      
+      // ✅ GA4 TRACKING: Use the standard 'ended' event as a fallback here
+      video.addEventListener('ended', fireVideoCompletedEvent);
+      
+      video.addEventListener('loadedmetadata', function () {
+        video.play();
+      });
+    }
+  }
 
-      btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
-      btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
-    </script>
+  btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
+  btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
+</script>
   </body>
 </html>
