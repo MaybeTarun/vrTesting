@@ -135,7 +135,7 @@
       </video>
     </a-scene>
 
-    <script>
+<script>
   // Make sure dataLayer exists
   window.dataLayer = window.dataLayer || [];
 
@@ -152,7 +152,7 @@
   function startPlaybackForLanguage(langKey) {
     const hlsSrc = sourcesByLang[langKey];
     if (!hlsSrc) return;
-    
+
     // GA4 TRACKING: Push language selection event
     dataLayer.push({
       event: 'language_selected',
@@ -166,27 +166,39 @@
       hls.loadSource(hlsSrc);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        video.play();
+        video.play().then(() => {
+          // UNMUTE AFTER PLAYBACK STARTS
+          video.muted = false;
+          video.volume = 1.0;
+          console.log('Video playing with audio');
+        }).catch(err => {
+          console.error('Playback failed:', err);
+        });
       });
     } else {
       // Fallback for browsers like Safari
       video.src = hlsSrc;
       video.addEventListener('loadedmetadata', function () {
-        video.play();
+        video.play().then(() => {
+          // UNMUTE AFTER PLAYBACK STARTS
+          video.muted = false;
+          video.volume = 1.0;
+          console.log('Video playing with audio');
+        }).catch(err => {
+          console.error('Playback failed:', err);
+        });
       });
     }
   }
-  
+
   // GA4 TRACKING: FINAL & MOST RELIABLE VIDEO COMPLETION LOGIC
   let hasCompleted = false; 
 
   // Listen for time updates as the video plays
   video.addEventListener('timeupdate', function() {
-    // Check if the video duration is available, if we are in the last half-second,
-    // and if the event hasn't already been sent for this playthrough.
     if (video.duration > 0 && (video.duration - video.currentTime < 0.5) && !hasCompleted) {
-      hasCompleted = true; // Set the flag so we only send the event once
-      console.log('Video playback has completed!'); // For testing in browser console
+      hasCompleted = true;
+      console.log('Video playback has completed!');
       dataLayer.push({
         event: 'video_completed'
       });
@@ -194,7 +206,6 @@
   });
 
   // Reset the completion flag when the video starts playing from the beginning
-  // This is important if the user replays the video.
   video.addEventListener('play', function() {
     if (video.currentTime < 1) { 
         hasCompleted = false;
@@ -204,6 +215,7 @@
   btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
   btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
 </script>
+
 
   </body>
 </html>
