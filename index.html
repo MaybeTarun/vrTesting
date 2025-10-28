@@ -158,7 +158,11 @@
 
         // Try to lock screen orientation to landscape
         if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
+          screen.orientation.lock('landscape').catch(() => {
+            alert('Please rotate your phone to landscape for the best experience.');
+          });
+        } else {
+          alert('Please rotate your phone to landscape for the best experience.');
         }
 
         dataLayer.push({
