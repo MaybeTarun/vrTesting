@@ -1,221 +1,155 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-NZHKSD52');</script>
-    <meta charset="utf-8" />
+
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
     <style>
-      *::selection {
-        background: rgba(255, 255, 255, 0.74);
-        color: #222;
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      /* Mobile stacking */
+      @media (max-width: 768px) {
+        #vr-container {
+          flex-direction: column !important;
+        }
+        #vr-container a-scene {
+          width: 100% !important;
+          height: 50% !important;
+        }
       }
     </style>
   </head>
-  <body>
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <body style="margin:0; padding:0; overflow:hidden; height:100vh; width:100vw;">
+    <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+
+    <!-- LANGUAGE OVERLAY -->
     <div id="language-overlay" style="
-      position:fixed;
-      inset:0;
-      background:rgba(20,20,20,0.93);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-      color:#fff;
-      flex-direction:column;
-      gap:28px;
-      font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      text-align:center;
-      padding:24px;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
+      position:fixed; inset:0; background:rgba(20,20,20,0.93);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999; color:#fff; flex-direction:column; gap:28px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      text-align:center; padding:24px; box-shadow:0 8px 48px rgba(0,0,0,0.6);
+      backdrop-filter:blur(8px);
     ">
-      <div style="
-        font-size: 2.1rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        margin-bottom: 2px;
-        text-shadow: 0 4px 18px rgba(0,0,0,0.18);
-        ">
+      <div style="font-size:2.1rem;font-weight:700;letter-spacing:0.05em;margin-bottom:2px;">
         Select Language
       </div>
-      <div style="
-        display: flex;
-        gap: 24px;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-        max-width: 500px;
-      ">
-        <button
-          id="btn-hindi"
-          style="
-            flex: 1 1 220px;
-            min-width:220px;
-            max-width:220px;
-            height:66px;
-            border-radius: 16px;
-            border: none;
-            background: rgba(38,38,38,0.98);
-            color: #fff;
-            cursor: pointer;
-            font-size: 1.22rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.19);
-            margin: 4px;
-            transition: background 0.19s, transform 0.13s, box-shadow 0.19s;
-            outline: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 8px;
-          "
-          onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
-          onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
-          onmousedown="this.style.background='#555'"
-          onmouseup="this.style.background='#444'"
-        >
-          Hindi
-        </button>
-        <button
-          id="btn-malayalam"
-          style="
-            flex: 1 1 220px;
-            min-width:220px;
-            max-width:220px;
-            height:66px;
-            border-radius: 16px;
-            border: none;
-            background: rgba(38,38,38,0.98);
-            color: #fff;
-            cursor: pointer;
-            font-size: 1.22rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.19);
-            margin: 4px;
-            transition: background 0.19s, transform 0.13s, box-shadow 0.19s;
-            outline: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 8px;
-          "
-          onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
-          onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
-          onmousedown="this.style.background='#555'"
-          onmouseup="this.style.background='#444'"
-        >
-          Malayalam
-        </button>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;width:100%;max-width:500px;">
+        <button id="btn-hindi" style="
+          flex:1 1 220px;min-width:220px;max-width:220px;height:66px;border-radius:16px;border:none;
+          background:rgba(38,38,38,0.98);color:#fff;cursor:pointer;font-size:1.22rem;font-weight:600;
+          letter-spacing:0.03em;box-shadow:0 4px 32px rgba(0,0,0,0.19);margin:4px;
+          transition:background 0.19s,transform 0.13s,box-shadow 0.19s;outline:none;
+          display:flex;align-items:center;justify-content:center;padding:0 8px;
+        "
+        onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
+        onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
+        onmousedown="this.style.background='#555'"
+        onmouseup="this.style.background='#444'">Hindi</button>
+
+        <button id="btn-malayalam" style="
+          flex:1 1 220px;min-width:220px;max-width:220px;height:66px;border-radius:16px;border:none;
+          background:rgba(38,38,38,0.98);color:#fff;cursor:pointer;font-size:1.22rem;font-weight:600;
+          letter-spacing:0.03em;box-shadow:0 4px 32px rgba(0,0,0,0.19);margin:4px;
+          transition:background 0.19s,transform 0.13s,box-shadow 0.19s;outline:none;
+          display:flex;align-items:center;justify-content:center;padding:0 8px;
+        "
+        onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
+        onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
+        onmousedown="this.style.background='#555'"
+        onmouseup="this.style.background='#444'">Malayalam</button>
       </div>
     </div>
 
-    <a-scene vr-mode-ui="enabled: true">
-      <a-videosphere 
-        src="#vid360" 
-        stereo="true"
-        rotation="0 180 0">
-      </a-videosphere>
+    <!-- VR VIDEO CONTAINER -->
+    <div id="vr-container" style="
+      display:flex; flex-direction:row;
+      width:100vw; height:100vh;
+      overflow:hidden; margin:0; padding:0;
+    ">
+      <a-scene embedded style="width:50%; height:100%; margin:0; padding:0;">
+        <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
+        <a-camera position="0 0 0"></a-camera>
+      </a-scene>
+      <a-scene embedded style="width:50%; height:100%; margin:0; padding:0;">
+        <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
+        <a-camera position="0 0 0"></a-camera>
+      </a-scene>
+    </div>
 
-      <video id="vid360" 
-             autoplay 
-             loop 
-             playsinline 
-             webkit-playsinline 
-             crossorigin="anonymous"
-             muted>
-      </video>
-    </a-scene>
+    <!-- HIDDEN VIDEO ELEMENT (SOURCE ONLY) -->
+    <video id="vid360"
+      autoplay loop playsinline webkit-playsinline crossorigin="anonymous" muted
+      style="display:none;">
+    </video>
 
-<script>
-  // Make sure dataLayer exists
-  window.dataLayer = window.dataLayer || [];
+    <script>
+      window.dataLayer = window.dataLayer || [];
 
-  const video = document.getElementById('vid360');
-  const overlay = document.getElementById('language-overlay');
-  const btnHindi = document.getElementById('btn-hindi');
-  const btnMalayalam = document.getElementById('btn-malayalam');
+      const video = document.getElementById('vid360');
+      const overlay = document.getElementById('language-overlay');
+      const btnHindi = document.getElementById('btn-hindi');
+      const btnMalayalam = document.getElementById('btn-malayalam');
 
-  const sourcesByLang = {
-    hi: 'https://stream.mux.com/PfUAw4LQEp600N7AZeZLHRnd5rPvU00lBPGwkzZDH01Q4Q.m3u8',
-    ml: 'https://stream.mux.com/ONbhP3Pu1cRkn00u1UHR02dX02D92tcr901CV01Q4LqLL9JI.m3u8'
-  };
+      const sourcesByLang = {
+        hi: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8',
+        ml: 'https://stream.mux.com/R3FTRZLcRuMCXuvYrgbwQDGSmMDSDejmve8thGXL7Io.m3u8'
+      };
 
-  function startPlaybackForLanguage(langKey) {
-    const hlsSrc = sourcesByLang[langKey];
-    if (!hlsSrc) return;
+      function startPlaybackForLanguage(langKey) {
+        const hlsSrc = sourcesByLang[langKey];
+        if (!hlsSrc) return;
 
-    // GA4 TRACKING: Push language selection event
-    dataLayer.push({
-      event: 'language_selected',
-      language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam'
-    });
-
-    overlay.style.display = 'none';
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(hlsSrc);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        video.play().then(() => {
-          // UNMUTE AFTER PLAYBACK STARTS
-          video.muted = false;
-          video.volume = 1.0;
-          console.log('Video playing with audio');
-        }).catch(err => {
-          console.error('Playback failed:', err);
+        dataLayer.push({
+          event: 'language_selected',
+          language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam'
         });
+
+        overlay.style.display = 'none';
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(hlsSrc);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = hlsSrc;
+          video.addEventListener('loadedmetadata', () => video.play());
+        } else {
+          video.src = hlsSrc;
+          video.play();
+        }
+      }
+
+      let hasCompleted = false;
+      video.addEventListener('ended', () => {
+        if (!hasCompleted) {
+          hasCompleted = true;
+          dataLayer.push({ event: 'video_completed' });
+        }
       });
-    } else {
-      // Fallback for browsers like Safari
-      video.src = hlsSrc;
-      video.addEventListener('loadedmetadata', function () {
-        video.play().then(() => {
-          // UNMUTE AFTER PLAYBACK STARTS
-          video.muted = false;
-          video.volume = 1.0;
-          console.log('Video playing with audio');
-        }).catch(err => {
-          console.error('Playback failed:', err);
-        });
+      video.addEventListener('play', () => {
+        if (video.currentTime < 1) hasCompleted = false;
       });
-    }
-  }
 
-  // GA4 TRACKING: FINAL & MOST RELIABLE VIDEO COMPLETION LOGIC
-  let hasCompleted = false; 
-
-  // Listen for time updates as the video plays
-  video.addEventListener('timeupdate', function() {
-    if (video.duration > 0 && (video.duration - video.currentTime < 0.5) && !hasCompleted) {
-      hasCompleted = true;
-      console.log('Video playback has completed!');
-      dataLayer.push({
-        event: 'video_completed'
-      });
-    }
-  });
-
-  // Reset the completion flag when the video starts playing from the beginning
-  video.addEventListener('play', function() {
-    if (video.currentTime < 1) { 
-        hasCompleted = false;
-    }
-  });
-
-  btnHindi.addEventListener('click', function () { startPlaybackForLanguage('hi'); });
-  btnMalayalam.addEventListener('click', function () { startPlaybackForLanguage('ml'); });
-</script>
-
-
+      btnHindi.onclick = () => startPlaybackForLanguage('hi');
+      btnMalayalam.onclick = () => startPlaybackForLanguage('ml');
+    </script>
   </body>
 </html>
