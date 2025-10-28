@@ -17,7 +17,6 @@
         padding: 0;
         height: 100%;
         width: 100%;
-        overflow: hidden;
         background: black;
       }
 
@@ -124,14 +123,14 @@
       <div id="vr-container">
         <a-scene embedded vr-mode-ui="enabled: false" ar-mode-ui="enabled: false">
           <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
-          <a-camera position="0 0 0"></a-camera>
+          <a-camera position="0 0 0" look-controls="touchEnabled: false; mouseEnabled: false"></a-camera>
         </a-scene>
         <a-scene embedded vr-mode-ui="enabled: false" ar-mode-ui="enabled: false">
           <a-videosphere src="#vid360" rotation="0 180 0"></a-videosphere>
-          <a-camera position="0 0 0"></a-camera>
+          <a-camera position="0 0 0" look-controls="touchEnabled: false; mouseEnabled: false"></a-camera>
         </a-scene>
       </div>
-      <img id="overlay-image" src="vroverlay21.png" alt="Overlay" />
+      <!-- <img id="overlay-image" src="vroverlay21.png" alt="Overlay" /> -->
     </div>
 
     <!-- Hidden video -->
