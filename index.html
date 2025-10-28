@@ -21,14 +21,13 @@
         background: black;
       }
 
-      /* Wrapper centers and maintains 16:9 ratio */
       #vr-wrapper {
         background: black;
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         position: relative;
       }
 
@@ -37,20 +36,19 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        aspect-ratio: 16 / 9;
+        aspect-ratio: 2 / 1;
         width: 100%;
         max-height: 100%;
         object-fit: cover;
         pointer-events: none;
       }
 
-      /* Container holds both scenes side by side */
       #vr-container {
         display: flex;
         flex-direction: row;
-        aspect-ratio: 16 / 9;
-        width: 100vw;
-        max-height: 100vh;
+        aspect-ratio: 2 / 1;
+        width: 100%;
+        max-height: 100%;
         background: black;
         overflow: hidden;
       }
@@ -134,7 +132,7 @@
           <a-camera position="0 0 0"></a-camera>
         </a-scene>
       </div>
-      <img id="overlay-image" src="vroverlay.png" alt="Overlay" />
+      <img id="overlay-image" src="vroverlay21.png" alt="Overlay" />
     </div>
 
     <!-- Hidden video -->
