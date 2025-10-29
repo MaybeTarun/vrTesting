@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dual VR Hindi Video Test</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: #000;
+        overflow: hidden;
+      }
+
+      #wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        background: #000;
+      }
+
+      .scene-container {
+        flex: 1;
+        position: relative;
+      }
+
+      a-scene {
+        width: 100%;
+        height: 100%;
+      }
+
+      #start-btn {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        font-size: 1.6rem;
+        font-weight: 600;
+        font-family: system-ui, sans-serif;
+        z-index: 9999;
+        cursor: pointer;
+      }
+
+      #start-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wrapper" style="display:none;">
+      <div class="scene-container">
+        <a-scene embedded vr-mode-ui="enabled: true">
+          <a-assets>
+            <video id="vid1" loop playsinline webkit-playsinline muted crossorigin="anonymous"></video>
+          </a-assets>
+          <a-sphere radius="500" scale="-1 1 1" src="#vid1" rotation="0 180 0"></a-sphere>
+        </a-scene>
+      </div>
+
+      <div class="scene-container">
+        <a-scene embedded vr-mode-ui="enabled: true">
+          <a-assets>
+            <video id="vid2" loop playsinline webkit-playsinline muted crossorigin="anonymous"></video>
+          </a-assets>
+          <a-sphere radius="500" scale="-1 1 1" src="#vid2" rotation="0 180 0"></a-sphere>
+        </a-scene>
+      </div>
+    </div>
+
+    <div id="start-btn">Start Experience</div>
+
+    <script>
+      const hlsSrc = 'https://stream.mux.com/PfUAw4LQEp600N7AZeZLHRnd5rPvU00lBPGwkzZDH01Q4Q.m3u8';
+      const btn = document.getElementById('start-btn');
+      const wrapper = document.getElementById('wrapper');
+
+      function setupHLS(videoEl, src) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(src);
+          hls.attachMedia(videoEl);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoEl.play().then(() => {
+              videoEl.muted = false;
+              videoEl.volume = 1.0;
+              console.log(videoEl.id, 'playing');
+            }).catch(err => console.error('Play failed:', err));
+          });
+        } else {
+          videoEl.src = src;
+          videoEl.addEventListener('loadedmetadata', () => {
+            videoEl.play().then(() => {
+              videoEl.muted = false;
+              videoEl.volume = 1.0;
+              console.log(videoEl.id, 'playing');
+            }).catch(err => console.error('Play failed:', err));
+          });
+        }
+      }
+
+      btn.addEventListener('click', () => {
+        wrapper.style.display = 'flex';
+        btn.style.display = 'none';
+        setupHLS(document.getElementById('vid1'), hlsSrc);
+        setupHLS(document.getElementById('vid2'), hlsSrc);
+      });
+    </script>
+  </body>
+</html>
