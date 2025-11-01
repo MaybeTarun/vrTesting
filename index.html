@@ -97,7 +97,7 @@
     <!-- Android / Desktop Scene -->
     <a-scene id="aframe-scene" vr-mode-ui="enabled: true">
       <a-videosphere src="#vid360" stereo="true" rotation="0 -90 0"></a-videosphere>
-      <video id="vid360" autoplay loop playsinline webkit-playsinline crossorigin="anonymous"></video>
+      <video id="vid360" autoplay playsinline webkit-playsinline crossorigin="anonymous"></video>
     </a-scene>
 
     <!-- iOS Bitmovin Container -->
@@ -156,9 +156,11 @@
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(console.error));
+          video.onended = showThankYouPage;
         } else {
           video.src = hlsSrc;
           video.play().catch(console.error);
+          video.onended = showThankYouPage;
         }
       }
 
@@ -173,8 +175,13 @@
           vr: { contentType: "single", startPosition: -90 },
         };
         const player = new bitmovin.player.Player(document.getElementById("player"), conf);
-        player.load(source).then(() => console.log("✅ VR video loaded")).catch(console.error);
+        player.load(source)
+          .then(() => console.log("video loaded"))
+          .catch(console.error);
 
+        player.on(bitmovin.player.PlayerEvent.PlaybackFinished, () => {
+          showThankYouPage();
+        });
         // iOS motion permission
         if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
           const btn = document.getElementById("motion-btn");
@@ -190,6 +197,56 @@
 
       btnHindi.addEventListener('click', () => startPlaybackForLanguage('hi'));
       btnMalayalam.addEventListener('click', () => startPlaybackForLanguage('ml'));
+
+      function showThankYouPage() {
+        window.location.href = "thankyou.html";
+      }
+
     </script>
+
+    <!-- Toast element -->
+    <div id="orientation-toast" style="
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.97);
+      color: #111;
+      text-align: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 10000;
+      pointer-events: none;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(6px);
+    ">
+      Please rotate your phone to landscape mode for the best experience.
+    </div>
+
+
+    <script>
+    const toast = document.getElementById('orientation-toast');
+
+    function checkOrientation() {
+      const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+      if (isPortrait) {
+        toast.style.opacity = 1;
+      } else {
+        toast.style.opacity = 0;
+      }
+    }
+
+    // Run check on load and when orientation changes
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    document.addEventListener('DOMContentLoaded', checkOrientation);
+    </script>
+
   </body>
 </html>
