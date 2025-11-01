@@ -9,251 +9,187 @@
     <meta charset="utf-8" />
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
     <style>
       *::selection {
         background: rgba(255, 255, 255, 0.74);
         color: #222;
+      }
+      .bmpui-ui-watermark {
+        display: none;
+      }
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #000;
+      }
+      #vr-wrapper {
+        display: none;
+        width: 100%;
+        height: 100%;
+        background: black;
+        justify-content: center;
+        align-items: center;
+      }
+      #vr-container {
+        display: flex;
+        flex-direction: row;
+        aspect-ratio: 2 / 1;
+        height: 100%;
+        width: auto;
+        overflow: hidden;
+      }
+      #player {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      #motion-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: #fff;
+        border: 1px solid #666;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+        z-index: 9999;
+        display: none;
       }
     </style>
   </head>
   <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NZHKSD52"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <!-- Language Selection Overlay -->
     <div id="language-overlay" style="
-      position:fixed;
-      inset:0;
-      background:rgba(20,20,20,0.93);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-      color:#fff;
-      flex-direction:column;
-      gap:28px;
+      position:fixed; inset:0; background:rgba(20,20,20,0.93);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999; color:#fff; flex-direction:column; gap:28px;
       font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      text-align:center;
-      padding:24px;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+      text-align:center; padding:24px; box-shadow:0 8px 48px rgba(0,0,0,0.6);
       backdrop-filter: blur(8px);
     ">
-      <div style="
-      font-size: 2.1rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      margin-bottom: 2px;
-      text-shadow: 0 4px 18px rgba(0,0,0,0.18);
-    ">
-      Select Language
-    </div>
-    
-    <div style="
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-      max-width: 500px;
-    ">
-      <button
-        id="btn-hindi"
-        style="
-          flex: 1 1 220px;
-          min-width:220px;
-          max-width:220px;
-          height:66px;
-          border-radius: 16px;
-          border: none;
-          background: rgba(38,38,38,0.98);
-          color: #fff;
-          cursor: pointer;
-          font-size: 1.22rem;
-          font-weight: 600;
-          letter-spacing: 0.03em;
-          box-shadow: 0 4px 32px rgba(0,0,0,0.19);
-          margin: 4px;
-          transition: background 0.19s, transform 0.13s, box-shadow 0.19s;
-          outline: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 8px;
-        "
-        onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
-        onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
-        onmousedown="this.style.background='#555'"
-        onmouseup="this.style.background='#444'"
-      >
-        Hindi
-      </button>
-      <button
-        id="btn-malayalam"
-        style="
-          flex: 1 1 220px;
-          min-width:220px;
-          max-width:220px;
-          height:66px;
-          border-radius: 16px;
-          border: none;
-          background: rgba(38,38,38,0.98);
-          color: #fff;
-          cursor: pointer;
-          font-size: 1.22rem;
-          font-weight: 600;
-          letter-spacing: 0.03em;
-          box-shadow: 0 4px 32px rgba(0,0,0,0.19);
-          margin: 4px;
-          transition: background 0.19s, transform 0.13s, box-shadow 0.19s;
-          outline: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 8px;
-        "
-        onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
-        onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'"
-        onmousedown="this.style.background='#555'"
-        onmouseup="this.style.background='#444'"
-      >
-        Malayalam
-      </button>
-    </div>
-    
-    <div style="
-      margin-top: 20px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: rgba(240,240,240,0.85);
-      text-align: center;
-      letter-spacing: 0.02em;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    ">
-      Press the <strong>VR button</strong> on the next screen to start the experience.
-    </div>
-    
+      <div style="font-size:2.1rem;font-weight:700;letter-spacing:0.05em;margin-bottom:2px;text-shadow:0 4px 18px rgba(0,0,0,0.18);">
+        Select Language
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;width:100%;max-width:500px;">
+        <button id="btn-hindi" style="flex:1 1 220px;min-width:220px;max-width:220px;height:66px;border-radius:16px;border:none;background:rgba(38,38,38,0.98);color:#fff;cursor:pointer;font-size:1.22rem;font-weight:600;letter-spacing:0.03em;box-shadow:0 4px 32px rgba(0,0,0,0.19);margin:4px;transition:background 0.19s,transform 0.13s,box-shadow 0.19s;outline:none;display:flex;align-items:center;justify-content:center;padding:0 8px;"
+          onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
+          onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'">
+          Hindi
+        </button>
+        <button id="btn-malayalam" style="flex:1 1 220px;min-width:220px;max-width:220px;height:66px;border-radius:16px;border:none;background:rgba(38,38,38,0.98);color:#fff;cursor:pointer;font-size:1.22rem;font-weight:600;letter-spacing:0.03em;box-shadow:0 4px 32px rgba(0,0,0,0.19);margin:4px;transition:background 0.19s,transform 0.13s,box-shadow 0.19s;outline:none;display:flex;align-items:center;justify-content:center;padding:0 8px;"
+          onmouseover="this.style.background='#444';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.31)';this.style.transform='scale(1.07)'"
+          onmouseout="this.style.background='rgba(38,38,38,0.98)';this.style.boxShadow='0 4px 32px rgba(0,0,0,0.19)';this.style.transform='scale(1)'">
+          Malayalam
+        </button>
+      </div>
+      <div style="margin-top:20px;font-size:1rem;font-weight:500;color:rgba(240,240,240,0.85);text-align:center;letter-spacing:0.02em;text-shadow:0 2px 8px rgba(0,0,0,0.25);">
+        Press the <strong>VR button</strong> on the next screen to start the experience.
+      </div>
     </div>
 
-    <a-scene vr-mode-ui="enabled: true">
-      <a-videosphere 
-        src="#vid360" 
-        stereo="true"
-        rotation="0 180 0">
-      </a-videosphere>
-
-      <video id="vid360" 
-             autoplay 
-             loop 
-             playsinline 
-             webkit-playsinline 
-             crossorigin="anonymous">
-      </video>
+    <!-- Android / Desktop Scene -->
+    <a-scene id="aframe-scene" vr-mode-ui="enabled: true">
+      <a-videosphere src="#vid360" stereo="true" rotation="0 180 0"></a-videosphere>
+      <video id="vid360" autoplay loop playsinline webkit-playsinline crossorigin="anonymous"></video>
     </a-scene>
 
+    <!-- iOS Bitmovin Container -->
+    <div id="vr-wrapper">
+      <div id="vr-container">
+        <div id="player"></div>
+      </div>
+    </div>
+    <button id="motion-btn">Enable Motion Control</button>
+
     <script>
-      // Make sure dataLayer exists
       window.dataLayer = window.dataLayer || [];
-    
+
       const video = document.getElementById('vid360');
       const overlay = document.getElementById('language-overlay');
       const btnHindi = document.getElementById('btn-hindi');
       const btnMalayalam = document.getElementById('btn-malayalam');
-    
-      // HLS sources for Android (A-Frame)
+
       const sourcesByLang = {
         hi: 'https://stream.mux.com/PfUAw4LQEp600N7AZeZLHRnd5rPvU00lBPGwkzZDH01Q4Q.m3u8',
         ml: 'https://stream.mux.com/ONbhP3Pu1cRkn00u1UHR02dX02D92tcr901CV01Q4LqLL9JI.m3u8'
       };
-    
-      // YouTube fallback links for iOS
-      const youtubeLinksByLang = {
-        hi: 'https://www.youtube.com/watch?v=dptKC09DRWk',
-        ml: 'https://www.youtube.com/watch?v=dptKC09DRWk'
+
+      // iOS video URLs for Bitmovin (use progressive MP4s)
+      const bitmovinSources = {
+        hi: "https://media.githubusercontent.com/media/moshidrafts/myk/main/public/m1_progressive.mp4",
+        ml: "https://media.githubusercontent.com/media/moshidrafts/myk/main/public/m1_progressive.mp4"
       };
-    
-      // Detect if device is iOS
+
       function isIOS() {
         return /iPhone|iPad|iPod/i.test(navigator.userAgent);
       }
-    
+
       function startPlaybackForLanguage(langKey) {
         const isIosDevice = isIOS();
-    
-        // GA4 tracking
+
         dataLayer.push({
           event: 'language_selected',
           language_choice: langKey === 'hi' ? 'Hindi' : 'Malayalam',
           device_type: isIosDevice ? 'iOS' : 'Android'
         });
-    
-        // If iOS → redirect to YouTube link
+
+        overlay.style.display = 'none';
+
         if (isIosDevice) {
-          const ytLink = youtubeLinksByLang[langKey];
-          if (ytLink) {
-            overlay.style.display = 'none';
-            window.location.href = ytLink;
-          } else {
-            alert('Video unavailable for this language on iOS.');
-          }
+          document.getElementById("aframe-scene").style.display = "none";
+          document.getElementById("vr-wrapper").style.display = "flex";
+          initBitmovin(bitmovinSources[langKey]);
           return;
         }
-    
-        // Otherwise, Android → use existing A-Frame + HLS flow
+
+        // Android/Desktop: use HLS + A-Frame
         const hlsSrc = sourcesByLang[langKey];
-        if (!hlsSrc) return;
-    
-        overlay.style.display = 'none';
-    
         if (Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play().then(() => {
-              video.muted = false;
-              video.volume = 1.0;
-              console.log('Video playing with audio');
-            }).catch(err => {
-              console.error('Playback failed:', err);
-            });
-          });
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(console.error));
         } else {
-          // Fallback for browsers like Safari on Android (rare)
           video.src = hlsSrc;
-          video.addEventListener('loadedmetadata', function () {
-            video.play().then(() => {
-              video.muted = false;
-              video.volume = 1.0;
-              console.log('Video playing with audio');
-            }).catch(err => {
-              console.error('Playback failed:', err);
+          video.play().catch(console.error);
+        }
+      }
+
+      function initBitmovin(videoUrl) {
+        const conf = {
+          key: "afff2d66-356a-44e2-a147-41c61eaa473e",
+          playback: { autoplay: true, muted: false },
+        };
+        const source = {
+          progressive: videoUrl,
+          poster: "https://myk-gules.vercel.app/logo.png",
+          vr: { contentType: "single", startPosition: -90 },
+        };
+        const player = new bitmovin.player.Player(document.getElementById("player"), conf);
+        player.load(source).then(() => console.log("✅ VR video loaded")).catch(console.error);
+
+        // iOS motion permission
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          const btn = document.getElementById("motion-btn");
+          btn.style.display = "block";
+          btn.addEventListener("click", () => {
+            DeviceMotionEvent.requestPermission().then(r => {
+              if (r === "granted") btn.remove();
+              else alert("Motion permission denied ❌");
             });
           });
         }
       }
-    
-      // GA4 Tracking: video completion event
-      let hasCompleted = false;
-      video.addEventListener('timeupdate', function() {
-        if (video.duration > 0 && (video.duration - video.currentTime < 0.5) && !hasCompleted) {
-          hasCompleted = true;
-          console.log('Video playback has completed!');
-          dataLayer.push({ event: 'video_completed' });
 
-          setTimeout(() => {
-            window.location.href = 'thankyou.html';
-          }, 500);
-        }
-      });
-      
-    
-      video.addEventListener('play', function() {
-        if (video.currentTime < 1) {
-          hasCompleted = false;
-        }
-      });
-    
       btnHindi.addEventListener('click', () => startPlaybackForLanguage('hi'));
       btnMalayalam.addEventListener('click', () => startPlaybackForLanguage('ml'));
-    </script>   
-
+    </script>
   </body>
 </html>
