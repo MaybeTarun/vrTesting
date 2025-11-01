@@ -103,10 +103,10 @@
     <!-- iOS Bitmovin Container -->
     <div id="vr-wrapper">
       <div id="vr-container">
-        <div id="player"></div>
+        <div id="player"/>
       </div>
+      <button id="motion-btn">Enable Motion Control</button>
     </div>
-    <button id="motion-btn">Enable Motion Control</button>
 
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -167,28 +167,38 @@
       function initBitmovin(videoUrl) {
         const conf = {
           key: "afff2d66-356a-44e2-a147-41c61eaa473e",
-          playback: { autoplay: true, muted: false },
+          playback: {
+            autoplay: true,
+            muted: false,
+          },
         };
         const source = {
           progressive: videoUrl,
           poster: "https://myk-gules.vercel.app/logo.png",
-          vr: { contentType: "single", startPosition: -90 },
+          vr: {
+            //startupMode: "3d",
+            contentType: "single",
+            startPosition: -90,
+          },
         };
+        
         const player = new bitmovin.player.Player(document.getElementById("player"), conf);
+
         player.load(source)
-          .then(() => console.log("video loaded"))
-          .catch(console.error);
+          .then(() => console.log("✅ VR video loaded"))
+          .catch(e => console.error("❌ Error loading video", e));
 
         player.on(bitmovin.player.PlayerEvent.PlaybackFinished, () => {
           showThankYouPage();
         });
+        
         // iOS motion permission
         if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
           const btn = document.getElementById("motion-btn");
           btn.style.display = "block";
           btn.addEventListener("click", () => {
-            DeviceMotionEvent.requestPermission().then(r => {
-              if (r === "granted") btn.remove();
+            DeviceMotionEvent.requestPermission().then(response => {
+              if (response === "granted") btn.remove();
               else alert("Motion permission denied ❌");
             });
           });
